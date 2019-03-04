@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/suranc/jx-sb-ms:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/suranc/jx-sb-ms:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-sb-ms
+        chartPath: charts/jx-sb-ms
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/suranc/jx-sb-ms'
+          image.tag: '{{.DIGEST_HEX}}'
